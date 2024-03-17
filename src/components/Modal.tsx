@@ -1,11 +1,45 @@
-const Modal = ({ showModal, setShowModal }) => {
-  const handleSubmit = (e) => {
+import React from "react";
+import toast from "react-hot-toast";
+
+export interface DataType {
+  name: string;
+  url: string;
+  id: number;
+}
+
+const Modal = ({
+  showModal,
+  setShowModal,
+}: {
+  showModal: boolean;
+  setShowModal: (show: boolean) => void;
+}) => {
+  // add shortcut
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const data = {
       name: e.target[0].value,
       url: e.target[1].value,
+      id: Date.now(),
     };
-    const shortcuts = JSON.parse(localStorage.getItem("data") as string) || [];
+
+    const shortcuts: DataType[] =
+      JSON.parse(localStorage.getItem("shortcuts")) || [];
+
+    const isExist = shortcuts.find(
+      (shortcut: DataType) =>
+        shortcut.name === data.name || shortcut.url === data.url
+    );
+
+    if (isExist) {
+      toast.error("this shortcurt is already added!");
+      return null;
+    } else {
+      const updatedShortcuts = [...shortcuts, { ...data }];
+      localStorage.setItem("shortcuts", JSON.stringify(updatedShortcuts));
+    }
+    setShowModal(false);
   };
 
   return (
@@ -24,6 +58,7 @@ const Modal = ({ showModal, setShowModal }) => {
             <input
               type="text"
               id="name"
+              required
               className="bg-gray-700 rounded-lg px-3 py-2 w-full text-white outline-none"
             />
           </div>
@@ -34,6 +69,7 @@ const Modal = ({ showModal, setShowModal }) => {
             <input
               type="url"
               id="url"
+              required
               className="bg-gray-700 rounded-lg px-3 py-2 w-full text-white outline-none"
             />
           </div>
